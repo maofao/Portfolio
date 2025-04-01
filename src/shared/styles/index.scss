@@ -1,0 +1,28 @@
+@import 'antd/dist/reset.css'; 
+
+.ant-table {
+  background: #2A2D3A !important;
+  color: #D3D6E0 !important;
+
+  .ant-table-thead > tr > th {
+    background: #1A1C24 !important;
+    color: #D3D6E0 !important;
+    border-bottom: 1px solid #3A3F50 !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid #3A3F50 !important;
+  }
+
+  .ant-table-row-custom {
+    background: #2A2D3A !important;
+    &:hover > td {
+      background: #3A3F50 !important;
+    }
+  }
+}
+
+.ant-table-placeholder {
+  background: #2A2D3A !important;
+  color: #D3D6E0 !important;
+}

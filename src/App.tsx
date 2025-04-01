@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
-import AssetList from './components/AssetsList';
+import { Layout, Typography } from 'antd';
 import AssetForm from './components/AssetsForm';
+import AssetList from './components/AssetsList';
 import { Asset, Prices } from './shared/types/types';
+
+const { Header, Content } = Layout;
+const { Title } = Typography;
+
+interface BinanceTicker {
+  stream: string;
+  data: { c: string; P: string };
+}
 
 function App() {
   const [assets, setAssets] = useState<Asset[]>(() => {
@@ -12,12 +21,13 @@ function App() {
 
   useEffect(() => {
     const ws = new WebSocket('wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker');
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    ws.onmessage = (event: MessageEvent<string>) => {
+      const data: BinanceTicker = JSON.parse(event.data);
       if (data.stream && data.data) {
         const symbol = data.stream.split('@')[0].toUpperCase();
         const price = parseFloat(data.data.c);
-        setPrices((prev) => ({ ...prev, [symbol]: price }));
+        const change24h = parseFloat(data.data.P);
+        setPrices((prev) => ({ ...prev, [symbol]: { price, change24h } }));
       }
     };
     return () => ws.close();
@@ -28,7 +38,7 @@ function App() {
   }, [assets]);
 
   const totalValue = assets.reduce(
-    (sum, asset) => sum + (prices[asset.symbol] || 0) * asset.quantity,
+    (sum, asset) => sum + ((prices[asset.symbol]?.price || 0) * asset.quantity),
     0
   );
 
@@ -41,11 +51,17 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-light-gray p-6 flex flex-col items-center">
-      <h1 className="mb-8">Портфель активов</h1>
-      <AssetForm onAdd={addAsset} />
-      <AssetList assets={assets} prices={prices} totalValue={totalValue} onRemove={removeAsset} />
-    </div>
+    <Layout style={{ minHeight: '100vh', background: '#1A1C24' }}>
+      <Header style={{ background: '#1A1C24', padding: '0 16px', borderBottom: '1px solid #3A3F50' }}>
+        <Title level={3} style={{ color: '#F7C627', margin: 0, lineHeight: '64px' }}>
+          Портфель: ${totalValue.toFixed(2)}
+        </Title>
+      </Header>
+      <Content style={{ padding: '16px', maxWidth: '800px', margin: '0 auto', background: '#1A1C24' }}>
+        <AssetForm onAdd={addAsset} />
+        <AssetList assets={assets} prices={prices} totalValue={totalValue} onRemove={removeAsset} />
+      </Content>
+    </Layout>
   );
 }
 

@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "antd": "^5.24.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-virtualized": "^9.22.6"
+    "react-virtualized": "^9.22.6",
+    "sass": "^1.86.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
