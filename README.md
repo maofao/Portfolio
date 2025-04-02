@@ -31,3 +31,5 @@ src/
 └── App.tsx            # Главный компонент приложения
     shared/── styles/            # SCSS-стили (index.scss)
            ├── types/             # TypeScript-типы
+### Развернутое приложение 
+[text](https://portfolio-ten-snowy-29.vercel.app/)
