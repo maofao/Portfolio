@@ -1,18 +1,23 @@
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../store';
 import { Form, Input, Button, Select } from 'antd';
-import { Asset } from '../shared/types/types';
-
-interface AssetFormProps {
-  onAdd: (asset: Asset) => void;
-}
+import { useForm } from 'antd/es/form/Form';
+import { addAsset } from '../store/slice';
 
 const { Option } = Select;
 
-function AssetForm({ onAdd }: AssetFormProps) {
-  const [form] = Form.useForm();
-  const popularAssets = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'ADAUSDT'];
+function AssetForm() {
+  const dispatch = useDispatch();
+  const [form] = useForm();
+  const availableSymbols = useSelector((state: RootState) => state.assets.availableSymbols);
 
-  const onFinish = (values: { symbol: string; quantity: number }) => {
-    onAdd({ symbol: values.symbol.toUpperCase(), quantity: values.quantity });
+  const onFinish = (values: { symbol: string; quantity: string }) => {
+    const quantity = parseFloat(values.quantity);
+    if (isNaN(quantity) || quantity <= 0) {
+      form.setFields([{ name: 'quantity', errors: ['Введи корректное количество!'] }]);
+      return;
+    }
+    dispatch(addAsset({ symbol: values.symbol.toUpperCase(), quantity }));
     form.resetFields();
   };
 
@@ -21,43 +26,53 @@ function AssetForm({ onAdd }: AssetFormProps) {
       form={form}
       onFinish={onFinish}
       layout="inline"
-      style={{ marginBottom: 16 }}
+      className="asset-form"
     >
       <Form.Item
         name="symbol"
-        rules={[{ required: true, message: 'Выбери символ!' }]}
-        style={{ marginRight: 8 }}
+        rules={[{ required: true, message: 'Выбери актив!' }]}
       >
-        <Select placeholder="Символ" style={{ width: 150 }}>
-          {popularAssets.map((asset) => (
-            <Option key={asset} value={asset}>
-              {asset}
+        <Select
+          placeholder="Актив"
+          style={{ width: 160 }}
+          showSearch
+          allowClear
+          optionFilterProp="children"
+          aria-label="Выбор актива"
+          loading={availableSymbols.length === 0} 
+        >
+          {availableSymbols.map((symbol) => (
+            <Option key={symbol} value={symbol}>
+              {symbol.replace('USDT', '')}
             </Option>
           ))}
         </Select>
       </Form.Item>
       <Form.Item
         name="quantity"
-        rules={[
-          { required: true, message: 'Введи количество!' },
-          { type: 'number', min: 0.0001, message: 'Количество должно быть больше 0!' },
-        ]}
-        style={{ marginRight: 8 }}
+        rules={[{ required: true, message: 'Введи количество!' }]}
       >
         <Input
           type="number"
           step="0.0001"
-          placeholder="Количество"
-          style={{ width: 150, background: '#2A2D3A', color: '#D3D6E0', border: 'none' }}
+          placeholder="0.0000"
+          style={{ width: 160 }}
+          onKeyPress={(e) => {
+            if (e.key === '-' || e.key === 'e') e.preventDefault();
+          }}
+          aria-label="Количество актива"
         />
       </Form.Item>
       <Form.Item>
+        <Button type="primary" htmlType="submit" aria-label="Добавить актив">
+          Добавить
+        </Button>
         <Button
-          type="primary"
-          htmlType="submit"
-          style={{ background: '#F7C627', borderColor: '#F7C627' }}
+          onClick={() => form.resetFields()}
+          style={{ marginLeft: 8 }}
+          aria-label="Сбросить форму"
         >
-          +
+          Сбросить
         </Button>
       </Form.Item>
     </Form>

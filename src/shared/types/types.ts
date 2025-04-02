@@ -9,3 +9,8 @@ export interface Prices {
     change24h: number;
   };
 }
+
+export interface BinanceTicker {
+  stream: string;
+  data: { c: string; P: string };
+}
